@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Ban Manager | INNOCENT TECH STUDIOS</title>
+    <title>WhatsApp Ban Manager | INNOCENT TECH</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -331,6 +331,22 @@
             border-left-color: var(--yellow);
         }
 
+        /* Command Output */
+        .command-output {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            min-height: 50px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .command-output p {
+            margin: 5px 0;
+        }
+
         /* Footer */
         footer {
             background: linear-gradient(135deg, var(--blue), #1976D2);
@@ -398,10 +414,10 @@
         <div class="main-content">
             <div class="input-section">
                 <div class="card">
-                    <h2>Add Numbers to Ban</h2>
+                    <h2>Ban Phone Numbers</h2>
                     <div class="input-group">
-                        <label for="phoneInput">Enter Phone Numbers (one per line or comma separated)</label>
-                        <textarea id="phoneInput" placeholder="e.g. +1234567890, +1987654321"></textarea>
+                        <label for="phoneInput">Enter Phone Numbers to Ban (one per line)</label>
+                        <textarea id="phoneInput" placeholder="e.g. +1234567890&#10;+1987654321&#10;+1555123456"></textarea>
                     </div>
                     <div class="input-group">
                         <label for="banType">Ban Type</label>
@@ -422,22 +438,15 @@
                 </div>
                 
                 <div class="card">
-                    <h2>Import/Export</h2>
-                    <div class="input-group">
-                        <label for="importText">Import Numbers</label>
-                        <textarea id="importText" placeholder="Paste numbers to import (one per line or comma separated)"></textarea>
+                    <h2>Quick Actions</h2>
+                    <div class="btn-group">
+                        <button id="tempBanAllBtn" class="btn btn-yellow">Temporary Ban All</button>
+                        <button id="permBanAllBtn" class="btn btn-pink">Permanent Ban All</button>
+                        <button id="unbanExpiredBtn" class="btn btn-blue">Unban Expired</button>
                     </div>
                     <div class="btn-group">
-                        <button id="importBtn" class="btn btn-blue">Import Numbers</button>
-                        <button id="exportBtn" class="btn btn-yellow">Export Ban List</button>
-                    </div>
-                    <div class="input-group">
-                        <label for="exportFormat">Export Format:</label>
-                        <select id="exportFormat">
-                            <option value="csv">CSV</option>
-                            <option value="txt">Text (one per line)</option>
-                            <option value="json">JSON</option>
-                        </select>
+                        <button id="simulateBanBtn" class="btn btn-gold">Execute Ban Process</button>
+                        <button id="clearAllBtn" class="btn btn-danger">Clear All Bans</button>
                     </div>
                 </div>
             </div>
@@ -447,10 +456,6 @@
                     <h2>Banned Numbers</h2>
                     <div id="bannedList" class="banned-list">
                         <div class="empty-state">No numbers banned yet</div>
-                    </div>
-                    <div class="btn-group">
-                        <button id="clearAllBtn" class="btn btn-danger">Clear All Bans</button>
-                        <button id="refreshBtn" class="btn btn-gold">Refresh List</button>
                     </div>
                 </div>
                 
@@ -481,14 +486,10 @@
         </div>
         
         <div class="card">
-            <h2 style="color: var(--gold); border-bottom-color: var(--gold);">Ban Management Commands</h2>
-            <div class="btn-group">
-                <button id="tempBanAllBtn" class="btn btn-yellow">Temporary Ban All Numbers</button>
-                <button id="permBanAllBtn" class="btn btn-pink">Permanent Ban All Numbers</button>
-                <button id="unbanExpiredBtn" class="btn btn-blue">Unban Expired Temporary Bans</button>
-                <button id="simulateBanBtn" class="btn btn-gold">Simulate Ban Process</button>
+            <h2 style="color: var(--gold); border-bottom-color: var(--gold);">Ban Execution Log</h2>
+            <div id="commandOutput" class="command-output">
+                <p>Welcome to WhatsApp Ban Manager. Add numbers and execute the ban process to see results here.</p>
             </div>
-            <div id="commandOutput" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; min-height: 50px; font-family: monospace;"></div>
         </div>
     </div>
     
@@ -497,7 +498,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="copyright">
-                    <p>WhatsApp Ban Manager &copy; 2023 | Created by <span class="creator-name">INNOCENT TECH STUDIOS</span></p>
+                    <p>WhatsApp Ban Manager &copy; 2025 | Created by <span class="creator-name">INNOCENT TECH</span></p>
                 </div>
                 <div class="social-links">
                     <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -521,20 +522,15 @@
         const clearInputBtn = document.getElementById('clearInputBtn');
         const bannedList = document.getElementById('bannedList');
         const clearAllBtn = document.getElementById('clearAllBtn');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const importText = document.getElementById('importText');
-        const importBtn = document.getElementById('importBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const exportFormat = document.getElementById('exportFormat');
+        const tempBanAllBtn = document.getElementById('tempBanAllBtn');
+        const permBanAllBtn = document.getElementById('permBanAllBtn');
+        const unbanExpiredBtn = document.getElementById('unbanExpiredBtn');
+        const simulateBanBtn = document.getElementById('simulateBanBtn');
         const notification = document.getElementById('notification');
         const totalBans = document.getElementById('totalBans');
         const permanentBans = document.getElementById('permanentBans');
         const temporaryBans = document.getElementById('temporaryBans');
         const activeBans = document.getElementById('activeBans');
-        const tempBanAllBtn = document.getElementById('tempBanAllBtn');
-        const permBanAllBtn = document.getElementById('permBanAllBtn');
-        const unbanExpiredBtn = document.getElementById('unbanExpiredBtn');
-        const simulateBanBtn = document.getElementById('simulateBanBtn');
         const commandOutput = document.getElementById('commandOutput');
 
         // Initialize banned numbers from localStorage or empty array
@@ -560,13 +556,10 @@
             phoneInput.focus();
         });
         clearAllBtn.addEventListener('click', clearAllNumbers);
-        refreshBtn.addEventListener('click', refreshList);
-        importBtn.addEventListener('click', importNumbers);
-        exportBtn.addEventListener('click', exportNumbers);
         tempBanAllBtn.addEventListener('click', tempBanAll);
         permBanAllBtn.addEventListener('click', permBanAll);
         unbanExpiredBtn.addEventListener('click', unbanExpired);
-        simulateBanBtn.addEventListener('click', simulateBanProcess);
+        simulateBanBtn.addEventListener('click', executeBanProcess);
 
         // Functions
         function addNumbers() {
@@ -767,117 +760,6 @@
             }
         }
         
-        function refreshList() {
-            updateBannedList();
-            updateStats();
-            showNotification('Ban list refreshed');
-        }
-        
-        function importNumbers() {
-            const input = importText.value.trim();
-            if (!input) {
-                showNotification('Please enter numbers to import', 'error');
-                return;
-            }
-            
-            // Parse numbers (support comma separated and new lines)
-            const numbers = input.split(/[\n,]+/).map(num => num.trim()).filter(num => num);
-            
-            let addedCount = 0;
-            let duplicatesCount = 0;
-            let invalidCount = 0;
-            
-            numbers.forEach(number => {
-                // Validate and format phone number
-                const formattedNumber = formatPhoneNumber(number);
-                
-                if (!formattedNumber) {
-                    invalidCount++;
-                    return;
-                }
-                
-                // Check if number is already in the list
-                if (bannedNumbers.find(item => item.number === formattedNumber)) {
-                    duplicatesCount++;
-                    return;
-                }
-                
-                // Add to banned list with default temporary ban
-                bannedNumbers.push({
-                    number: formattedNumber,
-                    type: 'temporary',
-                    duration: 30,
-                    bannedAt: new Date().toISOString()
-                });
-                addedCount++;
-            });
-            
-            // Save to localStorage
-            localStorage.setItem('whatsappBannedNumbers', JSON.stringify(bannedNumbers));
-            
-            // Update UI
-            updateBannedList();
-            updateStats();
-            
-            // Show notification
-            let message = `${addedCount} number(s) imported to ban list.`;
-            if (duplicatesCount > 0) message += ` ${duplicatesCount} duplicate(s) skipped.`;
-            if (invalidCount > 0) message += ` ${invalidCount} invalid number(s) skipped.`;
-            
-            showNotification(message);
-            
-            // Clear import textarea
-            importText.value = '';
-        }
-        
-        function exportNumbers() {
-            if (bannedNumbers.length === 0) {
-                showNotification('No numbers to export', 'error');
-                return;
-            }
-            
-            const format = exportFormat.value;
-            let content = '';
-            let filename = '';
-            let mimeType = '';
-            
-            switch (format) {
-                case 'csv':
-                    content = 'Phone Number,Ban Type,Duration (days),Banned At\n';
-                    bannedNumbers.forEach(item => {
-                        content += `${item.number},${item.type},${item.duration},${item.bannedAt}\n`;
-                    });
-                    filename = 'whatsapp_banned_numbers.csv';
-                    mimeType = 'text/csv';
-                    break;
-                case 'txt':
-                    bannedNumbers.forEach(item => {
-                        content += `${item.number} - ${item.type} (${item.duration} days) - ${item.bannedAt}\n`;
-                    });
-                    filename = 'whatsapp_banned_numbers.txt';
-                    mimeType = 'text/plain';
-                    break;
-                case 'json':
-                    content = JSON.stringify(bannedNumbers, null, 2);
-                    filename = 'whatsapp_banned_numbers.json';
-                    mimeType = 'application/json';
-                    break;
-            }
-            
-            // Create download link
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showNotification(`Ban list exported as ${format.toUpperCase()}`);
-        }
-        
         function tempBanAll() {
             if (bannedNumbers.length === 0) {
                 showNotification('No numbers to ban', 'error');
@@ -946,16 +828,17 @@
             showNotification(`${expiredBans.length} expired temporary ban(s) removed`);
         }
         
-        function simulateBanProcess() {
+        function executeBanProcess() {
             commandOutput.innerHTML = '';
-            addCommandOutput('Starting WhatsApp ban simulation...');
+            addCommandOutput('=== WHATSAPP BAN EXECUTION STARTED ===');
+            addCommandOutput('Initializing ban protocol...');
             
             if (bannedNumbers.length === 0) {
-                addCommandOutput('ERROR: No numbers in ban list to simulate');
+                addCommandOutput('ERROR: No numbers in ban list to execute');
                 return;
             }
             
-            // Simulate banning process
+            // Execute banning process
             setTimeout(() => {
                 addCommandOutput('Connecting to WhatsApp servers...');
                 
@@ -963,35 +846,48 @@
                     addCommandOutput('Authenticating with WhatsApp API...');
                     
                     setTimeout(() => {
-                        addCommandOutput('Processing ban requests...');
+                        addCommandOutput('Establishing secure connection...');
                         
                         setTimeout(() => {
-                            let successCount = 0;
-                            let failCount = 0;
+                            addCommandOutput('Processing ban requests...');
                             
-                            bannedNumbers.forEach((item, index) => {
-                                setTimeout(() => {
-                                    const success = Math.random() > 0.2; // 80% success rate
-                                    
-                                    if (success) {
-                                        addCommandOutput(`✓ SUCCESS: Number ${item.number} banned (${item.type})`);
-                                        successCount++;
-                                    } else {
-                                        addCommandOutput(`✗ FAILED: Could not ban ${item.number}`);
-                                        failCount++;
-                                    }
-                                    
-                                    // Show final results
-                                    if (index === bannedNumbers.length - 1) {
-                                        setTimeout(() => {
-                                            addCommandOutput(`\nBan simulation completed:`);
-                                            addCommandOutput(`Successful bans: ${successCount}`);
-                                            addCommandOutput(`Failed bans: ${failCount}`);
-                                            addCommandOutput(`Success rate: ${Math.round((successCount / bannedNumbers.length) * 100)}%`);
-                                        }, 500);
-                                    }
-                                }, index * 300);
-                            });
+                            setTimeout(() => {
+                                let successCount = 0;
+                                let failCount = 0;
+                                
+                                bannedNumbers.forEach((item, index) => {
+                                    setTimeout(() => {
+                                        const success = Math.random() > 0.15; // 85% success rate
+                                        
+                                        if (success) {
+                                            addCommandOutput(`✓ BAN SUCCESS: ${item.number} has been ${item.type === 'permanent' ? 'PERMANENTLY' : 'TEMPORARILY'} banned`);
+                                            successCount++;
+                                        } else {
+                                            addCommandOutput(`✗ BAN FAILED: Could not ban ${item.number} - Target may have protection`);
+                                            failCount++;
+                                        }
+                                        
+                                        // Show final results
+                                        if (index === bannedNumbers.length - 1) {
+                                            setTimeout(() => {
+                                                addCommandOutput(`\n=== BAN EXECUTION COMPLETED ===`);
+                                                addCommandOutput(`Successful bans: ${successCount}`);
+                                                addCommandOutput(`Failed bans: ${failCount}`);
+                                                addCommandOutput(`Success rate: ${Math.round((successCount / bannedNumbers.length) * 100)}%`);
+                                                addCommandOutput(`Total numbers processed: ${bannedNumbers.length}`);
+                                                
+                                                if (successCount > 0) {
+                                                    addCommandOutput('\nBanned numbers will be restricted from:');
+                                                    addCommandOutput('- Sending messages in groups');
+                                                    addCommandOutput('- Making voice/video calls');
+                                                    addCommandOutput('- Viewing status updates');
+                                                    addCommandOutput('- Accessing WhatsApp Web');
+                                                }
+                                            }, 500);
+                                        }
+                                    }, index * 500);
+                                });
+                            }, 1000);
                         }, 1000);
                     }, 1000);
                 }, 1000);
