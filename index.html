@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Ban Tool - Improved</title>
+    <style>
+        :root {
+            --primary-color: #25D366;
+            --secondary-color: #128C7E;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            resize: vertical;
+        }
+        
+        textarea {
+            min-height: 120px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .banned-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 10px;
+        }
+        
+        .banned-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .banned-item:last-child {
+            border-bottom: none;
+        }
+        
+        .banned-number {
+            font-weight: 500;
+        }
+        
+        .banned-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .action-btn:hover {
+            color: var(--danger-color);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--primary-color);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            border-left-color: var(--danger-color);
+        }
+        
+        .export-options {
+            margin-top: 15px;
+        }
+        
+        .export-options select {
+            padding: 8px;
+            border-radius: var(--border-radius);
+            border: 1px solid #ddd;
+            margin-right: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WhatsApp Ban Tool - Improved</h1>
+            <p class="description">Easily manage banned WhatsApp numbers with validation and bulk operations</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="card">
+                    <h2>Add Numbers to Ban List</h2>
+                    <div class="input-group">
+                        <label for="phoneInput">Enter Phone Numbers (one per line or comma separated)</label>
+                        <textarea id="phoneInput" placeholder="e.g. +1234567890, +1987654321"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button id="addBtn" class="btn">Add to Ban List</button>
+                        <button id="clearInputBtn" class="btn btn-danger">Clear Input</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Import/Export</h2>
+                    <div class="input-group">
+                        <label for="importText">Import Numbers</label>
+                        <textarea id="importText" placeholder="Paste numbers to import (one per line or comma separated)"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button id="importBtn" class="btn">Import Numbers</button>
+                        <button id="exportBtn" class="btn">Export Ban List</button>
+                    </div>
+                    <div class="export-options">
+                        <label for="exportFormat">Export Format:</label>
+                        <select id="exportFormat">
+                            <option value="csv">CSV</option>
+                            <option value="txt">Text (one per line)</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banned-section">
+                <div class="card">
+                    <h2>Banned Numbers</h2>
+                    <div id="bannedList" class="banned-list">
+                        <div class="empty-state">No numbers banned yet</div>
+                    </div>
+                    <div class="stats">
+                        <span id="bannedCount">Total: 0 numbers</span>
+                        <button id="clearAllBtn" class="btn btn-danger">Clear All</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Instructions</h2>
+                    <ul style="padding-left: 20px; margin-bottom: 15px;">
+                        <li>Enter phone numbers with country code (e.g., +1234567890)</li>
+                        <li>You can paste multiple numbers separated by commas or new lines</li>
+                        <li>Numbers are automatically validated and formatted</li>
+                        <li>Export your ban list for backup or use in other systems</li>
+                    </ul>
+                    <p><strong>Note:</strong> This tool runs entirely in your browser. No data is sent to any server.</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>WhatsApp Ban Tool &copy; 2023 | All data stays in your browser</p>
+        </footer>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        // DOM Elements
+        const phoneInput = document.getElementById('phoneInput');
+        const addBtn = document.getElementById('addBtn');
+        const clearInputBtn = document.getElementById('clearInputBtn');
+        const bannedList = document.getElementById('bannedList');
+        const bannedCount = document.getElementById('bannedCount');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const importText = document.getElementById('importText');
+        const importBtn = document.getElementById('importBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const exportFormat = document.getElementById('exportFormat');
+        const notification = document.getElementById('notification');
+        
+        // Initialize banned numbers from localStorage or empty array
+        let bannedNumbers = JSON.parse(localStorage.getItem('whatsappBannedNumbers')) || [];
+        
+        // Display initial banned numbers
+        updateBannedList();
+        
+        // Event Listeners
+        addBtn.addEventListener('click', addNumbers);
+        clearInputBtn.addEventListener('click', () => {
+            phoneInput.value = '';
+            phoneInput.focus();
+        });
+        clearAllBtn.addEventListener('click', clearAllNumbers);
+        importBtn.addEventListener('click', importNumbers);
+        exportBtn.addEventListener('click', exportNumbers);
+        
+        // Functions
+        function addNumbers() {
+            const input = phoneInput.value.trim();
+            if (!input) {
+                showNotification('Please enter at least one phone number', 'error');
+                return;
+            }
+            
+            // Parse numbers (support comma separated and new lines)
+            const numbers = input.split(/[\n,]+/).map(num => num.trim()).filter(num => num);
+            
+            let addedCount = 0;
+            let duplicatesCount = 0;
+            let invalidCount = 0;
+            
+            numbers.forEach(number => {
+                // Validate and format phone number
+                const formattedNumber = formatPhoneNumber(number);
+                
+                if (!formattedNumber) {
+                    invalidCount++;
+                    return;
+                }
+                
+                // Check if number is already in the list
+                if (bannedNumbers.includes(formattedNumber)) {
+                    duplicatesCount++;
+                    return;
+                }
+                
+                // Add to banned list
+                bannedNumbers.push(formattedNumber);
+                addedCount++;
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('whatsappBannedNumbers', JSON.stringify(bannedNumbers));
+            
+            // Update UI
+            updateBannedList();
+            
+            // Show notification
+            let message = `${addedCount} number(s) added to ban list.`;
+            if (duplicatesCount > 0) message += ` ${duplicatesCount} duplicate(s) skipped.`;
+            if (invalidCount > 0) message += ` ${invalidCount} invalid number(s) skipped.`;
+            
+            showNotification(message);
+            
+            // Clear input if all numbers were processed
+            if (addedCount + duplicatesCount === numbers.length) {
+                phoneInput.value = '';
+            }
+        }
+        
+        function formatPhoneNumber(number) {
+            // Remove all non-digit characters except +
+            let cleaned = number.replace(/[^\d+]/g, '');
+            
+            // Ensure it starts with +
+            if (!cleaned.startsWith('+')) {
+                // If no country code, consider it invalid
+                return null;
+            }
+            
+            // Basic validation - at least 8 digits after +
+            if (cleaned.length < 9) {
+                return null;
+            }
+            
+            return cleaned;
+        }
+        
+        function updateBannedList() {
+            // Update count
+            bannedCount.textContent = `Total: ${bannedNumbers.length} number(s)`;
+            
+            // Update list
+            if (bannedNumbers.length === 0) {
+                bannedList.innerHTML = '<div class="empty-state">No numbers banned yet</div>';
+                return;
+            }
+            
+            bannedList.innerHTML = '';
+            bannedNumbers.forEach((number, index) => {
+                const item = document.createElement('div');
+                item.className = 'banned-item';
+                item.innerHTML = `
+                    <span class="banned-number">${number}</span>
+                    <div class="banned-actions">
+                        <button class="action-btn" onclick="removeNumber(${index})">Remove</button>
+                    </div>
+                `;
+                bannedList.appendChild(item);
+            });
+        }
+        
+        function removeNumber(index) {
+            bannedNumbers.splice(index, 1);
+            localStorage.setItem('whatsappBannedNumbers', JSON.stringify(bannedNumbers));
+            updateBannedList();
+            showNotification('Number removed from ban list');
+        }
+        
+        function clearAllNumbers() {
+            if (bannedNumbers.length === 0) {
+                showNotification('Ban list is already empty', 'error');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear all banned numbers? This action cannot be undone.')) {
+                bannedNumbers = [];
+                localStorage.setItem('whatsappBannedNumbers', JSON.stringify(bannedNumbers));
+                updateBannedList();
+                showNotification('All numbers removed from ban list');
+            }
+        }
+        
+        function importNumbers() {
+            const input = importText.value.trim();
+            if (!input) {
+                showNotification('Please enter numbers to import', 'error');
+                return;
+            }
+            
+            // Parse numbers (support comma separated and new lines)
+            const numbers = input.split(/[\n,]+/).map(num => num.trim()).filter(num => num);
+            
+            let addedCount = 0;
+            let duplicatesCount = 0;
+            let invalidCount = 0;
+            
+            numbers.forEach(number => {
+                // Validate and format phone number
+                const formattedNumber = formatPhoneNumber(number);
+                
+                if (!formattedNumber) {
+                    invalidCount++;
+                    return;
+                }
+                
+                // Check if number is already in the list
+                if (bannedNumbers.includes(formattedNumber)) {
+                    duplicatesCount++;
+                    return;
+                }
+                
+                // Add to banned list
+                bannedNumbers.push(formattedNumber);
+                addedCount++;
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('whatsappBannedNumbers', JSON.stringify(bannedNumbers));
+            
+            // Update UI
+            updateBannedList();
+            
+            // Show notification
+            let message = `${addedCount} number(s) imported to ban list.`;
+            if (duplicatesCount > 0) message += ` ${duplicatesCount} duplicate(s) skipped.`;
+            if (invalidCount > 0) message += ` ${invalidCount} invalid number(s) skipped.`;
+            
+            showNotification(message);
+            
+            // Clear import textarea
+            importText.value = '';
+        }
+        
+        function exportNumbers() {
+            if (bannedNumbers.length === 0) {
+                showNotification('No numbers to export', 'error');
+                return;
+            }
+            
+            const format = exportFormat.value;
+            let content = '';
+            let filename = '';
+            let mimeType = '';
+            
+            switch (format) {
+                case 'csv':
+                    content = 'Phone Number\n' + bannedNumbers.join('\n');
+                    filename = 'whatsapp_banned_numbers.csv';
+                    mimeType = 'text/csv';
+                    break;
+                case 'txt':
+                    content = bannedNumbers.join('\n');
+                    filename = 'whatsapp_banned_numbers.txt';
+                    mimeType = 'text/plain';
+                    break;
+                case 'json':
+                    content = JSON.stringify(bannedNumbers, null, 2);
+                    filename = 'whatsapp_banned_numbers.json';
+                    mimeType = 'application/json';
+                    break;
+            }
+            
+            // Create download link
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification(`Ban list exported as ${format.toUpperCase()}`);
+        }
+        
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = 'notification';
+            
+            if (type === 'error') {
+                notification.classList.add('error');
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
